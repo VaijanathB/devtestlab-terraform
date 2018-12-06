@@ -9,7 +9,7 @@ trace "Setup folder structure ..."
 mkdir /runbooks && cd /runbooks
 
 trace "Downloading runbooks ..."
-for url in $*; do wget –quiet ${url}; done
+for url in $*; do wget –q ${url}; done
 
 trace "Cleanup runbooks ..."
 for file in $(find -type f -name "*\?*"); do mv $file $(echo $file | cut -d? -f1); done
