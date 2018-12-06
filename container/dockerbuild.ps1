@@ -13,7 +13,7 @@ function Write-HostHeader () {
 }
 
 Clear-Host
-$containerImage = "markusheiliger/terraform"
+$containerImage = "markusheiliger/tfrunner"
 
 $containers = $(docker ps -a -q -f ancestor=$($containerImage))
 if ($containers) { 
