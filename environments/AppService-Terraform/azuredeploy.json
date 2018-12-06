@@ -2,6 +2,10 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "CleanUp TFRunner": {
+            "type": "bool",
+            "defaultValue": true
+        },
         "_artifactsLocation": {
             "type": "string"
         },
@@ -46,7 +50,7 @@
                             "environmentVariables": [
                                 {
                                     "name": "ContainerGroupId",
-                                    "value": "[resourceId('Microsoft.ContainerInstance/containerGroups', variables('containerGroupName'))]"
+                                    "value": "[if(parameters('CleanUp TFRunner'), resourceId('Microsoft.ContainerInstance/containerGroups', variables('containerGroupName')), '')]"
                                 },
                                 {
                                     "name": "EnvironmentDeploymentName",

@@ -34,9 +34,10 @@ terraform init
 trace "Applying Terraform ..."
 terraform apply -auto-approve -var "EnvironmentResourceGroupName=$EnvironmentResourceGroupName"
 
-tail -f /dev/null
-
-if [[ ! -z "$ContainerGroupId" ]]; then
+if [ -z "$ContainerGroupId" ]; then
+    trace "Waiting for termination ..."
+    tail -f /dev/null
+else
     trace "Deleting container groups ..."
     az container delete --yes --ids $ContainerGroupId
 fi
