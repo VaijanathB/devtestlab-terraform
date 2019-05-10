@@ -41,6 +41,9 @@
                   "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]": {}
                 }
             },
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('identityName'))]"
+            ],
             "properties": {
                 "containers": [
                     {
@@ -75,10 +78,7 @@
                     }
                 ],
                 "osType": "Linux",
-                "restartPolicy": "Never",
-                "dependsOn": [
-                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('identityName'))]"
-                ]
+                "restartPolicy": "Never"
             }
         },
         {
