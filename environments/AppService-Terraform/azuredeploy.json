@@ -75,7 +75,10 @@
                     }
                 ],
                 "osType": "Linux",
-                "restartPolicy": "Never"
+                "restartPolicy": "Never",
+                "dependsOn": [
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]"
+                ]
             }
         },
         {
