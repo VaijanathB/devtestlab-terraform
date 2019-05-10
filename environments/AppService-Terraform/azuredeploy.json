@@ -15,6 +15,7 @@
     },
     "variables": {
         "resourcePrefix": "[concat('tfrunner-', uniqueString(resourceGroup().id, deployment().name))]",
+        "identityName": "[concat('msi-', uniqueString(resourceGroup().id, deployment().name))]",
         "containerGroupName": "[variables('resourcePrefix')]",
         "containerInstanceName": "[variables('resourcePrefix')]",
         "containerImageName": "markusheiliger/devtestlab-terraform",
@@ -24,12 +25,21 @@
     },
     "resources": [
         {
+            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+            "name": "[variables('identityName')]",
+            "apiVersion": "2018-11-30",
+            "location": "[resourceGroup().location]"
+        },
+        {
             "name": "[variables('containerGroupName')]",
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2018-10-01",
             "location": "[resourceGroup().location]",
             "identity": {
-                "type": "systemAssigned"
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]": {}
+                }
             },
             "properties": {
                 "containers": [
@@ -77,7 +87,7 @@
             ],
             "properties": {
                 "roleDefinitionId": "[variables('roleDefinition_Contributor')]",
-                "principalId": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups', variables('containerGroupName')), '2018-10-01', 'Full').identity.principalId]",
+                "principalId": "[reference(variables('identityName')).principalId]",
                 "scope": "[resourceGroup().id]"
             }
         }
