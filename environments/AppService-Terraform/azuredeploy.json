@@ -11,7 +11,16 @@
         },
         "_artifactsLocationSasToken": {
             "type": "securestring"
+        },
+        "vaultName": {
+            "type": "string",
+            "defaultValue": "Markuslabtestkeyvault"
+        },
+        "identityName": {
+            "type": "string",
+            "defaultValue": "UserDefinedManagedIdentity1"
         }
+
     },
     "variables": {
         "resourcePrefix": "[concat('tfrunner-', uniqueString(resourceGroup().id, deployment().name))]",
@@ -25,12 +34,6 @@
     },
     "resources": [
         {
-            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-            "name": "[variables('identityName')]",
-            "apiVersion": "2018-11-30",
-            "location": "[resourceGroup().location]"
-        },
-        {
             "name": "[variables('containerGroupName')]",
             "type": "Microsoft.ContainerInstance/containerGroups",
             "apiVersion": "2018-10-01",
@@ -38,7 +41,12 @@
             "identity": {
                 "type": "UserAssigned",
                 "userAssignedIdentities": {
-                  "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]": {}
+                    "reference": {
+                        "keyVault": {
+                            "id": "[resourceId(resourceGroup().id, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                        },
+                        "secretName": "[parameters('identityName')]"
+                    }
                 }
             },
             "dependsOn": [
@@ -90,7 +98,14 @@
             ],
             "properties": {
                 "roleDefinitionId": "[variables('roleDefinition_Contributor')]",
-                "principalId": "[reference(variables('identityName')).principalId]",
+                "principalId": {
+                    "reference": {
+                        "keyVault": {
+                        "id": "[resourceId(resourceGroup().id, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                        },
+                        "secretName": "[concat(parameters('identityName'), '-principalId']"
+                    }
+                },
                 "scope": "[resourceGroup().id]"
             }
         }
