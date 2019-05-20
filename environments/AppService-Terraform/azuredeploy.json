@@ -11,102 +11,47 @@
         },
         "_artifactsLocationSasToken": {
             "type": "securestring"
-        },
-        "vaultName": {
-            "type": "string",
-            "defaultValue": "Markuslabtestkeyvault"
-        },
-        "identityName": {
-            "type": "string",
-            "defaultValue": "UserDefinedManagedIdentity1"
         }
-
     },
     "variables": {
-        "resourcePrefix": "[concat('tfrunner-', uniqueString(resourceGroup().id, deployment().name))]",
-        "identityName": "[concat('msi', uniqueString(resourceGroup().id, deployment().name))]",
-        "containerGroupName": "[variables('resourcePrefix')]",
-        "containerInstanceName": "[variables('resourcePrefix')]",
-        "containerImageName": "vjdocker1/tfrunner",
-        "terraformRunbook": "[concat(parameters('_artifactsLocation'), '/azuredeploy.tf', parameters('_artifactsLocationSasToken'))]",
-        "roleAssignmentName": "[guid(variables('roleDefinition_Contributor'), variables('containerGroupName'))]",
-        "roleDefinition_Contributor": "[resourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]"
     },
     "resources": [
         {
-            "name": "[variables('containerGroupName')]",
-            "type": "Microsoft.ContainerInstance/containerGroups",
-            "apiVersion": "2018-10-01",
-            "location": "[resourceGroup().location]",
-            "identity": {
-                "type": "UserAssigned",
-                "userAssignedIdentities": {
-                    "reference": {
-                        "keyVault": {
-                            "id": "/subscriptions/cba4e087-aceb-44f0-970e-65e96eff4081/resourceGroups/MarkusLab/providers/Microsoft.KeyVault/vaults/Markuslabtestkeyvault"
-                        },
-                        "secretName": "[parameters('identityName')]"
+            "apiVersion": "2017-05-10",
+            "name": "[concat(deployment().name, '-runner')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(parameters('_artifactsLocation'), '/azuredeploy-runner.json', parameters('_artifactsLocationSasToken'))]"
+                },
+                "parameters": {
+                    "CleanUp TFRunner": {
+                        "value": "[parameters('CleanUp TFRunner')]"
+                    },
+                    "TFRunner Identity": {
+                        "reference": {
+                            "keyVault": {
+                                "id": "$(LabKeyVaultId)"
+                            },
+                            "secretName": "udmi-clientid"
+                        }
+                    },
+                    "TFRunner ResourceId": {
+                        "reference": {
+                            "keyVault": {
+                                "id": "$(LabKeyVaultId)"
+                            },
+                            "secretName": "udmi-resourceid"
+                        }
+                    },
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "type": "[parameters('_artifactsLocationSasToken')]"
                     }
                 }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('identityName'))]"
-            ],
-            "properties": {
-                "containers": [
-                    {
-                        "name": "[variables('containerInstanceName')]",
-                        "properties": {
-                            "command": [
-                                "tfrunner",
-                                "[variables('terraformRunbook')]"
-                            ],
-                            "image": "[variables('containerImageName')]",
-                            "resources": {
-                                "requests": {
-                                    "cpu": 1,
-                                    "memoryInGB": 1
-                                }
-                            },
-                            "environmentVariables": [
-                                {
-                                    "name": "ContainerGroupId",
-                                    "value": "[if(parameters('CleanUp TFRunner'), resourceId('Microsoft.ContainerInstance/containerGroups', variables('containerGroupName')), '')]"
-                                },
-                                {
-                                    "name": "EnvironmentDeploymentName",
-                                    "value": "[deployment().name]"
-                                },
-                                {
-                                    "name": "EnvironmentResourceGroupName",
-                                    "value": "[resourceGroup().name]"
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "osType": "Linux",
-                "restartPolicy": "Never"
-            }
-        },
-        {
-            "name": "[variables('roleAssignmentName')]",
-            "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "2017-05-01",
-            "dependsOn": [
-                "[resourceId('Microsoft.ContainerInstance/containerGroups', variables('containerGroupName'))]"
-            ],
-            "properties": {
-                "roleDefinitionId": "[variables('roleDefinition_Contributor')]",
-                "principalId": {
-                    "reference": {
-                        "keyVault": {
-                        "id": "/subscriptions/cba4e087-aceb-44f0-970e-65e96eff4081/resourceGroups/MarkusLab/providers/Microsoft.KeyVault/vaults/Markuslabtestkeyvault"
-                        },
-                        "secretName": "[concat(parameters('identityName'), '-principalId')]"
-                    }
-                },
-                "scope": "[resourceGroup().id]"
             }
         }
     ],
