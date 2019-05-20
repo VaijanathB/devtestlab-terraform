@@ -43,7 +43,7 @@
                 "userAssignedIdentities": {
                     "reference": {
                         "keyVault": {
-                            "id": "[resourceId(resourceGroup().id, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                            "id": "/subscriptions/cba4e087-aceb-44f0-970e-65e96eff4081/resourceGroups/MarkusLab/providers/Microsoft.KeyVault/vaults/Markuslabtestkeyvault"
                         },
                         "secretName": "[parameters('identityName')]"
                     }
@@ -101,7 +101,7 @@
                 "principalId": {
                     "reference": {
                         "keyVault": {
-                        "id": "[resourceId(resourceGroup().id, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                        "id": "/subscriptions/cba4e087-aceb-44f0-970e-65e96eff4081/resourceGroups/MarkusLab/providers/Microsoft.KeyVault/vaults/Markuslabtestkeyvault"
                         },
                         "secretName": "[concat(parameters('identityName'), '-principalId')]"
                     }
