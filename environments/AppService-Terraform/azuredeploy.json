@@ -103,7 +103,7 @@
                         "keyVault": {
                         "id": "[resourceId(resourceGroup().id, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
                         },
-                        "secretName": "[concat(parameters('identityName'), '-principalId']"
+                        "secretName": "[concat(parameters('identityName'), '-principalId')]"
                     }
                 },
                 "scope": "[resourceGroup().id]"
